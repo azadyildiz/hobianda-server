@@ -1,7 +1,6 @@
 import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
 import { saveLogoToServer, deleteLogoFromServer } from './utils/logo.utils';
 
 @Injectable()
@@ -40,7 +39,7 @@ export class ShopService {
       throw new InternalServerErrorException('Bir hata oluştu, lütfen daha sonra tekrar deneyin.');
     }
   }
-  async login(loginDto: LoginDto) {
+  async login() {
     return 'login';
   }
   async requestCode() {
