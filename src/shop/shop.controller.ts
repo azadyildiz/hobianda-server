@@ -9,7 +9,6 @@ export class ShopController {
   @Post('register')
   @UseInterceptors(FileInterceptor('logo'))
   async register(@Body() registerDto: RegisterDto, @UploadedFile() logo?: Express.Multer.File) {
-    console.log(registerDto, logo);
     return this.shopService.register(registerDto, logo);
   }
 
