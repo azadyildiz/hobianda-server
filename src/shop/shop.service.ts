@@ -2,6 +2,8 @@ import { ConflictException, Injectable, InternalServerErrorException } from '@ne
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { saveLogoToServer, deleteLogoFromServer } from './utils/logo.utils';
+import { getVerificationCode, getCodeExpiryTime } from './utils/verification.utils';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ShopService {
@@ -10,22 +12,43 @@ export class ShopService {
   async register(registerDto: RegisterDto, logo?: Express.Multer.File) {
     let logoPath: string | null = null;
     try {
+      // Save logo to server (if applicable)
       if (logo) {
         logoPath = saveLogoToServer(logo);
       }
 
-      const shop = await this.prismaService.shop.create({
+      // hash the password
+      const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+
+      // get verificationCode and codeExpiry
+      const verificationCode = getVerificationCode();
+      const codeExpiry = getCodeExpiryTime();
+
+      // save to database
+      await this.prismaService.shop.create({
         data: {
           name: registerDto.name,
           phone: registerDto.phone,
-          password: registerDto.password, // Gerçek uygulamada şifreyi hash'lemeniz gerekir
+          password: hashedPassword,
           logo: logoPath,
+          verificationCode,
+          codeExpiry,
         },
       });
-      return shop;
+
+      // send verificationCode to sms
+      // TODO add sms service and send real sms
+      console.log(`SMS sent to ${registerDto.phone} with code: ${verificationCode}`);
+
+      // response
+      return {
+        success: true,
+        message: 'Kayıt başarı ile oluşturuldu.',
+        data: {},
+      };
     } catch (error) {
       console.log(error);
-      // Logo kaydedilmişse ve hata oluştuysa, logoyu sunucudan sil
+      // Delete logo from server on error (if saved)
       if (logoPath) {
         deleteLogoFromServer(logoPath);
       }
