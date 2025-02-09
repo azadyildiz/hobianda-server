@@ -4,6 +4,7 @@ import { RegisterDto } from './dto/register.dto';
 import { saveLogoToServer, deleteLogoFromServer } from './utils/logo.utils';
 import { getVerificationCode, getCodeExpiryTime } from './utils/verification.utils';
 import * as bcrypt from 'bcrypt';
+import { t } from '../common/helpers/i18n.helper';
 
 @Injectable()
 export class ShopService {
@@ -42,8 +43,7 @@ export class ShopService {
 
       // response
       return {
-        success: true,
-        message: 'Kayıt başarı ile oluşturuldu.',
+        message: t('shop.success.register'),
         data: {},
       };
     } catch (error) {
