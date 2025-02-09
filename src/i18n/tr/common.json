@@ -1,0 +1,8 @@
+{
+  "success": {
+    "default": "Operasyon başarılı."
+  },
+  "error": {
+    "default": "Operasyon başarısız."
+  }
+}

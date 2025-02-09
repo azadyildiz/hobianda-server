@@ -1,0 +1,8 @@
+{
+  "success": {
+    "register": "Mağaza başarıyla oluşturuldu."
+  },
+  "error": {
+    "register": "Mağaza oluşturulamadı."
+  }
+}

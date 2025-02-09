@@ -1,0 +1,8 @@
+{
+  "success": {
+    "default": "Operation succeed."
+  },
+  "error": {
+    "default": "Operation failed."
+  }
+}
