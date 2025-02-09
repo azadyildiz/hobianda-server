@@ -43,7 +43,7 @@ export class ShopService {
 
       // response
       return {
-        message: t('shop.success.register'),
+        message: t('auth.success.register'),
         data: {},
       };
     } catch (error) {
@@ -55,11 +55,11 @@ export class ShopService {
 
       // Prisma'nın döndüğü hataları handle et
       if (error.code === 'P2002') {
-        throw new ConflictException('Bu telefon numarası zaten kayıtlı.');
+        throw new ConflictException(t('auth.error.conflict'));
       }
 
       // Diğer hatalar için genel bir hata mesajı
-      throw new InternalServerErrorException('Bir hata oluştu, lütfen daha sonra tekrar deneyin.');
+      throw new InternalServerErrorException(t('common.error.default'));
     }
   }
   async login() {

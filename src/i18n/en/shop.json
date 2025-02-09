@@ -1,8 +1,9 @@
 {
   "success": {
-    "register": "The store has been created successfully."
+    "register": "Kayıt işlemi başarılı."
   },
   "error": {
-    "register": "The store could not be created."
+    "register": "Registration failed. Try again later.",
+    "conflict": "Already registered. Try logging in."
   }
 }

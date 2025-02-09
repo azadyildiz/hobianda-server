@@ -3,6 +3,6 @@
     "default": "Operasyon başarılı."
   },
   "error": {
-    "default": "Operasyon başarısız."
+    "default": "Bir hata oluştu, lütfen daha sonra tekrar deneyin."
   }
 }
