@@ -13,7 +13,7 @@ model Shop {
   phone             String   @unique
   password          String
   isVerified        Boolean  @default(false)
-  verificationCode  String?
+  verificationCode  Int?
   codeExpiry        DateTime?
   logo              String?
   services          Service[]

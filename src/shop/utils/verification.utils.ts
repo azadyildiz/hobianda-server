@@ -1,5 +1,5 @@
-export function getVerificationCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+export function getVerificationCode(): number {
+  return Math.floor(100000 + Math.random() * 900000);
 }
 
 export function getCodeExpiryTime(minute: number = 5): Date {
