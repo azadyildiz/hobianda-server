@@ -13,6 +13,14 @@ export class ShopService {
   async register(registerDto: RegisterDto, logo?: Express.Multer.File) {
     let logoPath: string | null = null;
     try {
+      // check if phone already exists
+      const existingShop = await this.prismaService.shop.findFirst({
+        where: { phone: registerDto.phone },
+      });
+      if (existingShop) {
+        throw new ConflictException(t('auth.error.conflict'));
+      }
+
       // Save logo to server (if applicable)
       if (logo) {
         logoPath = saveLogoToServer(logo);
@@ -21,10 +29,6 @@ export class ShopService {
       // hash the password
       const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-      // get verificationCode and codeExpiry
-      const verificationCode = getVerificationCode();
-      const codeExpiry = getCodeExpiryTime();
-
       // save to database
       await this.prismaService.shop.create({
         data: {
@@ -32,14 +36,8 @@ export class ShopService {
           phone: registerDto.phone,
           password: hashedPassword,
           logo: logoPath,
-          verificationCode,
-          codeExpiry,
         },
       });
-
-      // send verificationCode to sms
-      // TODO add sms service and send real sms
-      console.log(`SMS sent to ${registerDto.phone} with code: ${verificationCode}`);
 
       // response
       return {
@@ -53,12 +51,7 @@ export class ShopService {
         deleteLogoFromServer(logoPath);
       }
 
-      // Prisma'nın döndüğü hataları handle et
-      if (error.code === 'P2002') {
-        throw new ConflictException(t('auth.error.conflict'));
-      }
-
-      // Diğer hatalar için genel bir hata mesajı
+      // Handle error
       throw new InternalServerErrorException(t('common.error.default'));
     }
   }
