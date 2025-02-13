@@ -16,10 +16,19 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const status =
       exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    // Extract the error message.
-    // For HttpException, the response can be an object or a string.
-    const message =
-      exception instanceof HttpException ? exception.getResponse() : 'Internal Server Error';
+    // get the error message from the exception
+    const errorResponse = exception instanceof HttpException ? exception.getResponse() : null;
+    let message = '';
+
+    if (typeof errorResponse === 'string') {
+      message = errorResponse;
+    } else if (typeof errorResponse === 'object' && errorResponse !== null) {
+      message = (errorResponse as any).message || message;
+      // if the message is an array, take the first element as the message
+      if (Array.isArray(message)) {
+        message = message[0];
+      }
+    }
 
     // Return the error response in the standardized format.
     response.status(status).json({
