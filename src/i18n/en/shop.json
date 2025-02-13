@@ -1,9 +1,0 @@
-{
-  "success": {
-    "register": "Kayıt işlemi başarılı."
-  },
-  "error": {
-    "register": "Registration failed. Try again later.",
-    "conflict": "Already registered. Try logging in."
-  }
-}
