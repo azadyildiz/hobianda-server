@@ -1,6 +1,7 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
+import { RequestCodeDto } from './dto/request-code.dto';
 import { saveLogoToServer, deleteLogoFromServer } from './utils/logo.utils';
 import { getVerificationCode, getCodeExpiryTime } from './utils/verification.utils';
 import * as bcrypt from 'bcrypt';
@@ -14,11 +15,11 @@ export class ShopService {
     let logoPath: string | null = null;
     try {
       // check if phone already exists
-      const existingShop = await this.prismaService.shop.findFirst({
+      const existingShop = await this.prismaService.shop.findUnique({
         where: { phone: registerDto.phone },
       });
       if (existingShop) {
-        throw new ConflictException(t('auth.error.conflict'));
+        throw new ConflictException(t('auth.error.registerConflict'));
       }
 
       // Save logo to server (if applicable)
@@ -45,22 +46,68 @@ export class ShopService {
         data: {},
       };
     } catch (error) {
-      console.log(error);
       // Delete logo from server on error (if saved)
       if (logoPath) {
         deleteLogoFromServer(logoPath);
       }
 
-      // Handle error
-      throw new InternalServerErrorException(t('common.error.default'));
+      throw error;
     }
   }
   async login() {
     return 'login';
   }
-  async requestCode() {
-    return 'requestCode';
+
+  async requestCode(requestCodeDto: RequestCodeDto) {
+    try {
+      const { phone, password } = requestCodeDto;
+      const shop = await this.prismaService.shop.findUnique({
+        where: { phone },
+      });
+
+      // Check if shop exists
+      if (!shop) {
+        throw new NotFoundException(t('auth.error.notFound'));
+      }
+
+      // Check if password is not correct
+      const isPasswordCorrect = await bcrypt.compare(password, shop.password);
+      if (!isPasswordCorrect) {
+        throw new NotFoundException(t('auth.error.notFound'));
+      }
+
+      // Check if shop is already verified
+      if (shop.isVerified) {
+        throw new ConflictException(t('auth.error.verifyConflict'));
+      }
+
+      // Generate verification code
+      const verificationCode = getVerificationCode();
+      const codeExpiry = getCodeExpiryTime();
+
+      // TODO: Send verification code to phone (e.g. SMS) in production
+      console.log(`Phone number: ${phone}, verification code: ${verificationCode}`);
+
+      // update shop with verificationCode and codeExpiry
+      await this.prismaService.shop.update({
+        where: { phone },
+        data: {
+          verificationCode,
+          codeExpiry,
+        },
+      });
+
+      // Response
+      return {
+        message: t('auth.success.requestCode'),
+        // TODO: Remove verificationCode from response in production
+        data: { verificationCode },
+      };
+    } catch (error) {
+      throw error;
+    }
   }
+
   async verifyCode() {
     return 'verifyCode';
   }
