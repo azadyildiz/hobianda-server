@@ -2,6 +2,7 @@ import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/c
 import { ShopService } from './shop.service';
 import { RegisterDto } from './dto/register.dto';
 import { RequestCodeDto } from './dto/request-code.dto';
+import { VerifyCodeDto } from './dto/verify-code.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 @Controller('shop')
 export class ShopController {
@@ -24,7 +25,7 @@ export class ShopController {
   }
 
   @Post('verify-code')
-  async verifyCode() {
-    return this.shopService.verifyCode();
+  async verifyCode(@Body() verifyCodeDto: VerifyCodeDto) {
+    return this.shopService.verifyCode(verifyCodeDto);
   }
 }
