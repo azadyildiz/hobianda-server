@@ -1,6 +1,8 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 import { RequestCodeDto } from './dto/request-code.dto';
 import { VerifyCodeDto } from './dto/verify-code.dto';
 import { saveLogoToServer, deleteLogoFromServer } from './utils/logo.utils';
@@ -10,7 +12,10 @@ import { t } from '../common/helpers/i18n.helper';
 
 @Injectable()
 export class ShopService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private jwtService: JwtService
+  ) {}
 
   async register(registerDto: RegisterDto, logo?: Express.Multer.File) {
     let logoPath: string | null = null;
@@ -55,8 +60,45 @@ export class ShopService {
       throw error;
     }
   }
-  async login() {
-    return 'login';
+  async login(loginDto: LoginDto) {
+    try {
+      const { phone, password } = loginDto;
+
+      const shop = await this.prismaService.shop.findUnique({
+        where: { phone },
+      });
+
+      // check if phone exists
+      if (!shop) {
+        throw new NotFoundException(t('auth.error.notFound'));
+      }
+
+      // check if shop is verified
+      if (!shop.isVerified) {
+        throw new ConflictException(t('auth.error.notVerified'));
+      }
+
+      // check if password is correct
+      const isPasswordCorrect = await bcrypt.compare(password, shop.password);
+      if (!isPasswordCorrect) {
+        throw new NotFoundException(t('auth.error.notFound'));
+      }
+
+      // generate token
+      const token = this.jwtService.sign({
+        userId: shop.id,
+        phone: shop.phone,
+      });
+
+      return {
+        message: t('auth.success.login'),
+        data: {
+          token,
+        },
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async requestCode(requestCodeDto: RequestCodeDto) {

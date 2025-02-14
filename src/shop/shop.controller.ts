@@ -1,6 +1,7 @@
 import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ShopService } from './shop.service';
 import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 import { RequestCodeDto } from './dto/request-code.dto';
 import { VerifyCodeDto } from './dto/verify-code.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -15,8 +16,8 @@ export class ShopController {
   }
 
   @Post('login')
-  async login() {
-    return this.shopService.login();
+  async login(@Body() loginDto: LoginDto) {
+    return this.shopService.login(loginDto);
   }
 
   @Post('request-code')
