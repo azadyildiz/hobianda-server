@@ -4,6 +4,7 @@ import {
   IsPhoneNumber,
   IsPositive,
   IsString,
+  IsStrongPassword,
   Max,
   Min,
 } from 'class-validator';
@@ -16,6 +17,13 @@ export class VerifyCodeDto {
 
   @IsNotEmpty()
   @IsString()
+  @IsStrongPassword({
+    minLength: 6,
+    minLowercase: 0,
+    minUppercase: 0,
+    minNumbers: 0,
+    minSymbols: 0,
+  })
   password: string;
 
   @IsPositive()
