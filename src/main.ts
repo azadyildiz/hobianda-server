@@ -1,12 +1,23 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Swagger configs
+  const config = new DocumentBuilder()
+    .setTitle('Hobianda API')
+    .setDescription('Hobianda API description')
+    .setVersion('1.0')
+    .addTag('hobianda')
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, documentFactory);
 
   // Register global exception filters for HTTP and Prisma errors.
   app.useGlobalFilters(new GlobalExceptionFilter(), new PrismaExceptionFilter());

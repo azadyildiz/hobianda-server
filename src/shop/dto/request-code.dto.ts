@@ -1,11 +1,14 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsPhoneNumber, IsString, IsStrongPassword } from 'class-validator';
 
 export class RequestCodeDto {
+  @ApiProperty({description: 'Shop phone number', example: '+90 535 123 45 67', required: true, type: 'string'})
   @IsNotEmpty()
   @IsString()
   @IsPhoneNumber('TR')
   phone: string;
 
+  @ApiProperty({description: 'Shop password', example: '123456', required: true, type: 'string'})
   @IsNotEmpty()
   @IsString()
   @IsStrongPassword({
