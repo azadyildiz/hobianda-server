@@ -5,11 +5,12 @@ import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Swagger configs
+  // Swagger config
   const config = new DocumentBuilder()
     .setTitle('Hobianda API')
     .setDescription('Hobianda API description')
@@ -18,6 +19,12 @@ async function bootstrap() {
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
+
+  // Helmet middleware
+  app.use(helmet());
+
+  // Enable CORS
+  app.enableCors();
 
   // Register global exception filters for HTTP and Prisma errors.
   app.useGlobalFilters(new GlobalExceptionFilter(), new PrismaExceptionFilter());
