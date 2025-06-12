@@ -28,10 +28,13 @@ model Service {
   name        String
   description String
   guestCount  Int            @default(1)
+  bookingInterval        Int @default(30)
+  bookingLimitAtSameTime Int @default(1)
+  maxDaysAfterBooking   Int             @default(7)
+  schedules             WeeklySchedule[]
   pricing     Pricing[]      @relation("ServicePricing")
   additionalOptions AdditionalOption[] @relation("ServiceAdditionalOptions")
   categories  Category[]     @relation("ServiceCategories")
-  bookings    Booking[]
   location    Location?      @relation(fields: [locationId], references: [id])
   locationId  Int?           @unique
   reviews     Review[]
@@ -68,30 +71,16 @@ model AdditionalOption {
   @@map("additional_options")
 }
 
-model Booking {
-  id                    Int             @id @default(autoincrement())
-  maxDaysAfterBooking   Int             @default(7)
-  schedules             WeeklySchedule[]
-  serviceId             Int
-  service               Service         @relation(fields: [serviceId], references: [id])
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
-
-  @@map("bookings")
-}
-
 model WeeklySchedule {
   id                     Int      @id @default(autoincrement())
   day                    DayOfWeek
   available              Boolean
   startTime              DateTime?
   endTime                DateTime?
-  bookingInterval        Int?
-  bookingLimitAtSameTime Int?
-  bookingId              Int
-  booking                Booking  @relation(fields: [bookingId], references: [id])
+  serviceId              Int
+  service                Service  @relation(fields: [serviceId], references: [id])
 
-  @@unique([day, bookingId])
+  @@unique([day, serviceId])
   @@map("weekly_schedules")
 }
 
